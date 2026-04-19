@@ -138,4 +138,57 @@ class SemVerTest {
         assertEquals(0, SemVer.parse("1.0.0").compareTo(SemVer.parse("1.0.0")));
         assertEquals(0, SemVer.parse("1.0.0-alpha").compareTo(SemVer.parse("1.0.0-alpha")));
     }
+
+    @Test
+    void buildMetadataAccepted() {
+        // Per semver 2.0.0, build metadata after + is valid
+        SemVer v = SemVer.parse("1.0.0+build.1");
+        assertEquals(1, v.major());
+        assertEquals(0, v.minor());
+        assertEquals(0, v.patch());
+        assertNull(v.prerelease());
+    }
+
+    @Test
+    void buildMetadataWithPrerelease() {
+        SemVer v = SemVer.parse("1.0.0-alpha+build.123");
+        assertEquals(1, v.major());
+        assertEquals("alpha", v.prerelease());
+    }
+
+    @Test
+    void buildMetadataIgnoredInComparison() {
+        // Build metadata MUST be ignored in version precedence
+        assertEquals(0, SemVer.parse("1.0.0+build.1").compareTo(SemVer.parse("1.0.0+build.2")));
+        assertEquals(0, SemVer.parse("1.0.0+build.1").compareTo(SemVer.parse("1.0.0")));
+    }
+
+    @Test
+    void buildMetadataIsValid() {
+        assertTrue(SemVer.isValid("1.0.0+build.1"));
+        assertTrue(SemVer.isValid("1.0.0-alpha+build"));
+        assertTrue(SemVer.isValid("1.0.0+20230101"));
+    }
+
+    @Test
+    void leadingZerosInPrereleaseRejected() {
+        // Numeric prerelease identifiers MUST NOT have leading zeros
+        assertThrows(IllegalArgumentException.class, () -> SemVer.parse("1.0.0-01"));
+        assertThrows(IllegalArgumentException.class, () -> SemVer.parse("1.0.0-alpha.01"));
+        assertThrows(IllegalArgumentException.class, () -> SemVer.parse("1.0.0-001"));
+    }
+
+    @Test
+    void leadingZerosInPrereleaseNotValid() {
+        assertFalse(SemVer.isValid("1.0.0-01"));
+        assertFalse(SemVer.isValid("1.0.0-alpha.01"));
+    }
+
+    @Test
+    void singleZeroPrereleaseIsValid() {
+        // "0" alone is a valid numeric identifier (no leading zeros issue)
+        SemVer v = SemVer.parse("1.0.0-0");
+        assertEquals("0", v.prerelease());
+        assertTrue(SemVer.isValid("1.0.0-0"));
+    }
 }

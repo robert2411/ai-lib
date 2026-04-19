@@ -5,7 +5,9 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
  */
 public class MetadataCodec {
 
+    private static final Logger LOG = Logger.getLogger(MetadataCodec.class.getName());
     private static final String DELIMITER = "---";
 
     private MetadataCodec() {
@@ -271,8 +274,9 @@ public class MetadataCodec {
         String str = val.toString();
         try {
             return Instant.parse(str);
-        } catch (Exception e) {
-            return null;
+        } catch (DateTimeParseException e) {
+            LOG.warning("Malformed timestamp for key '" + key + "': " + str);
+            throw new IllegalArgumentException("Invalid timestamp for field '" + key + "': " + str, e);
         }
     }
 

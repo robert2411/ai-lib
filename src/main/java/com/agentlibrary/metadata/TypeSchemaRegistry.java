@@ -41,39 +41,43 @@ public class TypeSchemaRegistry {
             return DEFAULT_SCHEMA;
         }
 
-        Yaml yaml = new Yaml();
-        Map<String, Object> map = yaml.load(is);
-        if (map == null) {
+        try (is) {
+            Yaml yaml = new Yaml();
+            Map<String, Object> map = yaml.load(is);
+            if (map == null) {
+                return DEFAULT_SCHEMA;
+            }
+
+            Set<String> required = new LinkedHashSet<>();
+            if (map.containsKey("required") && map.get("required") instanceof List<?> rList) {
+                required = rList.stream().map(Object::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            }
+
+            Set<String> optional = new LinkedHashSet<>();
+            if (map.containsKey("optional") && map.get("optional") instanceof List<?> oList) {
+                optional = oList.stream().map(Object::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+            }
+
+            Set<Harness> allowedHarnesses = null;
+            if (map.containsKey("allowedHarnesses")) {
+                Object ahObj = map.get("allowedHarnesses");
+                if (ahObj instanceof String s && "all".equals(s)) {
+                    allowedHarnesses = null; // all allowed
+                } else if (ahObj instanceof List<?> ahList) {
+                    allowedHarnesses = ahList.stream()
+                            .map(Object::toString)
+                            .map(Harness::fromSlug)
+                            .collect(Collectors.toSet());
+                }
+            }
+
+            return new TypeSchema(
+                    Collections.unmodifiableSet(required),
+                    Collections.unmodifiableSet(optional),
+                    allowedHarnesses != null ? Collections.unmodifiableSet(allowedHarnesses) : null
+            );
+        } catch (java.io.IOException e) {
             return DEFAULT_SCHEMA;
         }
-
-        Set<String> required = new LinkedHashSet<>();
-        if (map.containsKey("required") && map.get("required") instanceof List<?> rList) {
-            required = rList.stream().map(Object::toString).collect(Collectors.toCollection(LinkedHashSet::new));
-        }
-
-        Set<String> optional = new LinkedHashSet<>();
-        if (map.containsKey("optional") && map.get("optional") instanceof List<?> oList) {
-            optional = oList.stream().map(Object::toString).collect(Collectors.toCollection(LinkedHashSet::new));
-        }
-
-        Set<Harness> allowedHarnesses = null;
-        if (map.containsKey("allowedHarnesses")) {
-            Object ahObj = map.get("allowedHarnesses");
-            if (ahObj instanceof String s && "all".equals(s)) {
-                allowedHarnesses = null; // all allowed
-            } else if (ahObj instanceof List<?> ahList) {
-                allowedHarnesses = ahList.stream()
-                        .map(Object::toString)
-                        .map(Harness::fromSlug)
-                        .collect(Collectors.toSet());
-            }
-        }
-
-        return new TypeSchema(
-                Collections.unmodifiableSet(required),
-                Collections.unmodifiableSet(optional),
-                allowedHarnesses != null ? Collections.unmodifiableSet(allowedHarnesses) : null
-        );
     }
 }

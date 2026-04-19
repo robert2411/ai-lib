@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public final class SemVer implements Comparable<SemVer> {
 
     private static final Pattern SEMVER_PATTERN = Pattern.compile(
-            "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-([-a-zA-Z0-9]+(?:\\.[-a-zA-Z0-9]+)*))?$"
+            "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-([-a-zA-Z0-9]+(?:\\.[-a-zA-Z0-9]+)*))?(?:\\+[a-zA-Z0-9]+(?:\\.[a-zA-Z0-9]+)*)?$"
     );
 
     private final int major;
@@ -61,6 +61,17 @@ public final class SemVer implements Comparable<SemVer> {
         int minor = Integer.parseInt(matcher.group(2));
         int patch = Integer.parseInt(matcher.group(3));
         String prerelease = matcher.group(4); // nullable
+
+        // Validate: numeric prerelease identifiers MUST NOT have leading zeros (semver 2.0.0 spec)
+        if (prerelease != null) {
+            for (String id : prerelease.split("\\.")) {
+                if (id.length() > 1 && id.charAt(0) == '0' && isNumeric(id)) {
+                    throw new IllegalArgumentException(
+                            "Invalid semver format: numeric prerelease identifier must not have leading zeros: " + id);
+                }
+            }
+        }
+
         return new SemVer(major, minor, patch, prerelease);
     }
 
@@ -68,10 +79,12 @@ public final class SemVer implements Comparable<SemVer> {
      * Returns true if the given string is a valid semver version.
      */
     public static boolean isValid(String version) {
-        if (version == null || version.isBlank()) {
+        try {
+            parse(version);
+            return true;
+        } catch (IllegalArgumentException e) {
             return false;
         }
-        return SEMVER_PATTERN.matcher(version).matches();
     }
 
     @Override
