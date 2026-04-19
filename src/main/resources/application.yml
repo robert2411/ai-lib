@@ -6,6 +6,7 @@ server:
   port: 8080
 
 library:
+  data-dir: ./data
   repo-path: ./data/library.git
   work-path: ./data/library-work
   users-file: ./data/users.yaml
