@@ -39,10 +39,19 @@ public class LocalGitArtifactRepository implements ArtifactRepository {
     private final AppProperties properties;
     private final WriteQueue writeQueue;
     private Repository repository;
+    private Runnable refreshCallback;
 
     public LocalGitArtifactRepository(AppProperties properties, WriteQueue writeQueue) {
         this.properties = properties;
         this.writeQueue = writeQueue;
+    }
+
+    /**
+     * Sets a callback invoked after each save/delete commit.
+     * Used by IndexService to refresh the in-memory cache.
+     */
+    public void setRefreshCallback(Runnable callback) {
+        this.refreshCallback = callback;
     }
 
     /**
@@ -131,6 +140,11 @@ public class LocalGitArtifactRepository implements ArtifactRepository {
 
             // 7. Update INDEX.yaml
             updateIndex(meta, user);
+
+            // 8. Notify index to refresh
+            if (refreshCallback != null) {
+                refreshCallback.run();
+            }
 
             // Get timestamp from commit
             try (RevWalk rw = new RevWalk(repository)) {
@@ -270,6 +284,11 @@ public class LocalGitArtifactRepository implements ArtifactRepository {
             PersonIdent serverIdent = new PersonIdent("agent-library", "server@agent-library");
             ObjectId indexCommitId = createCommit(indexTreeId, "chore: update INDEX.yaml", serverIdent, serverIdent);
             updateHead(indexCommitId);
+
+            // Notify index to refresh
+            if (refreshCallback != null) {
+                refreshCallback.run();
+            }
         } catch (StorageException e) {
             throw e;
         } catch (IOException e) {
