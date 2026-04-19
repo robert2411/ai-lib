@@ -67,7 +67,8 @@ class EditControllerTest {
     @WithMockUser(roles = "USER")
     void getNew_userGetsForbidden() throws Exception {
         mockMvc.perform(get("/artifacts/new"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test
@@ -159,13 +160,15 @@ class EditControllerTest {
                         .param("name", "test")
                         .param("type", "skill")
                         .param("version", "1.0.0"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void postDelete_userGetsForbidden() throws Exception {
         mockMvc.perform(post("/artifacts/my-skill/delete"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 }

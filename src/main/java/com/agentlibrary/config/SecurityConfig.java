@@ -54,6 +54,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/artifacts/**").hasAnyRole("EDITOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/**").authenticated()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            if (request.getRequestURI().startsWith("/api/")) {
+                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN);
+                            } else {
+                                response.sendRedirect("/");
+                            }
+                        })
                 );
 
         return http.build();

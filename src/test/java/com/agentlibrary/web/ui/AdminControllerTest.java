@@ -75,16 +75,18 @@ class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void getAdmin_nonAdmin_returns403() throws Exception {
+    void getAdmin_nonAdmin_redirectsToHome() throws Exception {
         mockMvc.perform(get("/admin"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test
     @WithMockUser(roles = "EDITOR")
-    void getAdmin_editor_returns403() throws Exception {
+    void getAdmin_editor_redirectsToHome() throws Exception {
         mockMvc.perform(get("/admin"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test
@@ -111,9 +113,10 @@ class AdminControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void postReindex_nonAdmin_returns403() throws Exception {
+    void postReindex_nonAdmin_redirectsToHome() throws Exception {
         mockMvc.perform(post("/admin/reindex"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test

@@ -34,7 +34,11 @@
     <div class="filters" style="justify-content:space-between;align-items:center;">
         <div class="filter-group">
             <label for="version-select">Version</label>
-            <select id="version-select">
+            <select id="version-select"
+                    hx-get="/artifacts"
+                    hx-target="#content-area"
+                    hx-swap="innerHTML"
+                    hx-trigger="change">
                 <option th:each="v : ${versions}" th:value="${v.version()}" th:text="${v.version()}"
                         th:selected="${v.version() == currentVersion}">1.0.0</option>
             </select>
@@ -82,8 +86,11 @@
 <div layout:fragment="scripts">
     <script th:inline="javascript">
         var artifactSlug = /*[[${artifact.metadata().name()}]]*/ "";
-        document.getElementById("version-select").addEventListener("change", function() {
-            window.location = "/artifacts/" + artifactSlug + "/" + this.value;
+
+        document.body.addEventListener("htmx:configRequest", function(evt) {
+            if (evt.detail.elt.id === "version-select") {
+                evt.detail.path = "/artifacts/" + artifactSlug + "/" + evt.detail.elt.value + "/content";
+            }
         });
 
         function copyToClipboard(text) {
