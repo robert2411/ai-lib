@@ -1,7 +1,7 @@
 ---
 id: TASK-0006
 title: Milestone 6 — Auth and Password Tooling
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-19 20:03'
 updated_date: '2026-04-19 23:03'
