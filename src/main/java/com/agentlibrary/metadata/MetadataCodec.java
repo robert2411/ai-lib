@@ -55,7 +55,7 @@ public class MetadataCodec {
      * @return the encoded string with frontmatter + body
      */
     public static String encode(Artifact artifact) {
-        Map<String, Object> map = metadataToMap(artifact.metadata());
+        Map<String, Object> map = toMap(artifact.metadata());
 
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -112,6 +112,29 @@ public class MetadataCodec {
         String body = bodyStart == -1 ? "" : rawContent.substring(bodyStart + 1);
 
         return new String[]{yamlSection, body};
+    }
+
+    /**
+     * Converts a map of string keys to an ArtifactMetadata record.
+     * Used by IndexFile and other components that need to deserialise metadata from maps.
+     *
+     * @param map the key-value map representing metadata
+     * @return the parsed ArtifactMetadata
+     */
+    @SuppressWarnings("unchecked")
+    public static ArtifactMetadata metadataFromMap(Map<String, Object> map) {
+        return mapToMetadata(map);
+    }
+
+    /**
+     * Converts an ArtifactMetadata record to a map of string keys.
+     * Used by IndexFile and other components that need to serialise metadata to maps.
+     *
+     * @param meta the metadata to convert
+     * @return the map representation
+     */
+    public static Map<String, Object> metadataToMap(ArtifactMetadata meta) {
+        return toMap(meta);
     }
 
     @SuppressWarnings("unchecked")
@@ -198,7 +221,7 @@ public class MetadataCodec {
                 created, updated, install, members, extra.isEmpty() ? null : extra);
     }
 
-    private static Map<String, Object> metadataToMap(ArtifactMetadata meta) {
+    private static Map<String, Object> toMap(ArtifactMetadata meta) {
         Map<String, Object> map = new LinkedHashMap<>();
 
         map.put("name", meta.name());
@@ -271,6 +294,9 @@ public class MetadataCodec {
     private static Instant parseInstant(Map<String, Object> map, String key) {
         Object val = map.get(key);
         if (val == null) return null;
+        if (val instanceof java.util.Date date) {
+            return date.toInstant();
+        }
         String str = val.toString();
         try {
             return Instant.parse(str);

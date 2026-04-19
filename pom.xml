@@ -82,6 +82,13 @@
             <version>${bucket4j.version}</version>
         </dependency>
 
+        <!-- Apache Commons Compress (tar.gz bundle support) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.26.1</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
