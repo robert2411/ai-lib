@@ -1,27 +1,20 @@
 package com.agentlibrary.config;
 
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
+import com.agentlibrary.auth.LoginRateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Duration;
-
 /**
- * Rate limiting configuration using Bucket4j.
- * Provides a global rate limit bucket for login attempts.
+ * Rate limiting configuration.
+ * Creates the {@link RateLimitFilter} bean (not auto-registered via @Component
+ * to avoid double-registration when added explicitly to the security filter chain).
  */
 @Configuration
 public class RateLimitConfig {
 
     @Bean
-    public Bucket loginRateLimitBucket() {
-        Bandwidth limit = Bandwidth.builder()
-                .capacity(5)
-                .refillGreedy(5, Duration.ofMinutes(1))
-                .build();
-        return Bucket.builder()
-                .addLimit(limit)
-                .build();
+    public RateLimitFilter rateLimitFilter(LoginRateLimiter loginRateLimiter) {
+        return new RateLimitFilter(loginRateLimiter);
     }
 }
+

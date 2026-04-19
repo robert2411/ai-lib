@@ -1,26 +1,29 @@
 package com.agentlibrary.config;
 
-import io.github.bucket4j.Bucket;
+import com.agentlibrary.auth.LoginRateLimiter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 /**
- * Rate limiting filter for login endpoint.
- * Returns 429 Too Many Requests when rate limit is exceeded.
+ * Rate limiting filter for the login endpoint.
+ * Applies per-IP token bucket rate limiting via {@link LoginRateLimiter}.
+ * Returns 429 Too Many Requests when the rate limit is exceeded.
+ *
+ * <p>Registered explicitly in SecurityConfig filter chain (before
+ * UsernamePasswordAuthenticationFilter), not via {@code @Component}
+ * to avoid double-registration.</p>
  */
-@Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private final Bucket loginRateLimitBucket;
+    private final LoginRateLimiter loginRateLimiter;
 
-    public RateLimitFilter(Bucket loginRateLimitBucket) {
-        this.loginRateLimitBucket = loginRateLimitBucket;
+    public RateLimitFilter(LoginRateLimiter loginRateLimiter) {
+        this.loginRateLimiter = loginRateLimiter;
     }
 
     @Override
@@ -29,7 +32,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         if ("POST".equalsIgnoreCase(request.getMethod())
                 && "/login".equals(request.getRequestURI())) {
-            if (!loginRateLimitBucket.tryConsume(1)) {
+            String clientIp = extractClientIp(request);
+            if (!loginRateLimiter.resolveBucket(clientIp).tryConsume(1)) {
                 response.setStatus(429);
                 response.getWriter().write("Too Many Requests");
                 return;
@@ -37,4 +41,17 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    /**
+     * Extracts client IP, checking X-Forwarded-For header first (for reverse proxy deployments).
+     */
+    static String extractClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            // Take the first IP (original client) from comma-separated list
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
 }
+
