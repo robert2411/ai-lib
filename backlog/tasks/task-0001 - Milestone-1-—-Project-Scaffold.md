@@ -1,9 +1,10 @@
 ---
 id: TASK-0001
 title: Milestone 1 — Project Scaffold
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-19 20:02'
+updated_date: '2026-04-19 20:39'
 labels:
   - milestone
 dependencies: []
