@@ -124,7 +124,7 @@ public class ArtifactApiController {
 
     /**
      * Updates an artifact at a specific slug/version.
-     * Verifies slug in path matches slug in content frontmatter.
+     * Verifies slug and version in path match those in content frontmatter.
      */
     @PutMapping(value = "/{slug}/{version}", consumes = {"text/plain", "application/json"})
     public ResponseEntity<ArtifactResponse> update(
@@ -138,6 +138,13 @@ public class ArtifactApiController {
             throw new IllegalArgumentException(
                     "Slug in path '" + slug + "' does not match slug in content '"
                             + decoded.metadata().name() + "'");
+        }
+
+        // Verify version matches
+        if (!version.equals(decoded.metadata().version())) {
+            throw new IllegalArgumentException(
+                    "Version in path '" + version + "' does not match version in content '"
+                            + decoded.metadata().version() + "'");
         }
 
         User user = extractUser(principal);

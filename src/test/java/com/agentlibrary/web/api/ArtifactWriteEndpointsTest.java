@@ -139,6 +139,19 @@ class ArtifactWriteEndpointsTest {
     }
 
     @Test
+    @WithMockUser(roles = "EDITOR")
+    void put_versionMismatch_returns400() throws Exception {
+        // Path says version "2.0.0" but content has "1.0.0"
+        mockMvc.perform(put("/api/v1/artifacts/git-helper/2.0.0")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(VALID_RAW_CONTENT)
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("Version in path")));
+    }
+
+    @Test
     @WithMockUser(roles = "ADMIN")
     void delete_removesArtifact_returns204() throws Exception {
         doNothing().when(artifactService).delete(eq("git-helper"), any(User.class));
@@ -214,5 +227,46 @@ class ArtifactWriteEndpointsTest {
         mockMvc.perform(delete("/api/v1/artifacts/git-helper")
                         .with(csrf()))
                 .andExpect(status().isForbidden());
+    }
+
+    // ===== Content-Type acceptance tests =====
+
+    @Test
+    @WithMockUser(roles = "EDITOR")
+    void post_textPlainContentType_accepted() throws Exception {
+        when(artifactService.createOrUpdate(anyString(), any(User.class)))
+                .thenReturn(new CommitResult("abc123", Instant.now(), "commit"));
+
+        mockMvc.perform(post("/api/v1/artifacts")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(VALID_RAW_CONTENT)
+                        .with(csrf()))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @WithMockUser(roles = "EDITOR")
+    void put_textPlainContentType_accepted() throws Exception {
+        when(artifactService.createOrUpdate(anyString(), any(User.class)))
+                .thenReturn(new CommitResult("abc123", Instant.now(), "update"));
+
+        mockMvc.perform(put("/api/v1/artifacts/git-helper/1.0.0")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(VALID_RAW_CONTENT)
+                        .with(csrf()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "EDITOR")
+    void post_applicationJsonContentType_accepted() throws Exception {
+        when(artifactService.createOrUpdate(anyString(), any(User.class)))
+                .thenReturn(new CommitResult("abc123", Instant.now(), "commit"));
+
+        mockMvc.perform(post("/api/v1/artifacts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(VALID_RAW_CONTENT)
+                        .with(csrf()))
+                .andExpect(status().isCreated());
     }
 }

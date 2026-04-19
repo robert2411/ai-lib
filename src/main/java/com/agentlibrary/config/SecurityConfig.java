@@ -18,6 +18,8 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
+import org.yaml.snakeyaml.error.YAMLException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -86,6 +88,9 @@ public class SecurityConfig {
 
         try (InputStream is = Files.newInputStream(path)) {
             data = yaml.load(is);
+        } catch (YAMLException e) {
+            throw new IllegalStateException(
+                    "Users file at " + path + " contains invalid YAML: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new IllegalStateException(
                     "Failed to read users file at " + path + ": " + e.getMessage(), e);
@@ -93,7 +98,8 @@ public class SecurityConfig {
 
         if (data == null || !data.containsKey("users")) {
             throw new IllegalStateException(
-                    "Users file at " + path + " is malformed: missing 'users' key");
+                    "Users file at " + path + " is malformed: missing 'users' key. "
+                            + "Expected format: users: [{username: ..., password: '<bcrypt hash>', roles: [...]}]");
         }
 
         List<Map<String, Object>> userEntries = (List<Map<String, Object>>) data.get("users");
@@ -106,7 +112,8 @@ public class SecurityConfig {
 
             if (username == null || password == null || roles == null) {
                 throw new IllegalStateException(
-                        "Malformed user entry in " + path + ": username, password, and roles are required");
+                        "Malformed user entry in " + path + ": each entry requires 'username', "
+                                + "'password' (bcrypt hash), and 'roles' (list of role names)");
             }
 
             UserDetails user = User.builder()
