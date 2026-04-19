@@ -1,7 +1,7 @@
 ---
 id: TASK-0007
 title: Milestone 7 — Web UI (Thymeleaf and HTMX)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-19 20:04'
 updated_date: '2026-04-19 23:41'
