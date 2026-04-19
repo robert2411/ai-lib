@@ -1,0 +1,15 @@
+required:
+  - name
+  - type
+  - version
+optional:
+  - title
+  - description
+  - tags
+  - category
+  - language
+  - author
+  - visibility
+  - install
+allowedHarnesses:
+  - claude

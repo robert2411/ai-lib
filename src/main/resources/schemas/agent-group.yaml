@@ -1,0 +1,14 @@
+required:
+  - name
+  - type
+  - version
+  - members
+optional:
+  - title
+  - description
+  - tags
+  - category
+  - language
+  - author
+  - visibility
+allowedHarnesses: all

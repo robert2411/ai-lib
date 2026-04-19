@@ -1,0 +1,17 @@
+required:
+  - name
+  - type
+  - version
+  - description
+optional:
+  - title
+  - harnesses
+  - tags
+  - category
+  - language
+  - author
+  - visibility
+  - install
+allowedHarnesses:
+  - claude
+  - copilot
