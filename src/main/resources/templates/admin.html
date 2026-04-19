@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Administration</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="page-header">
+        <h1>Administration</h1>
+    </div>
+
+    <!-- Reindex Section -->
+    <div class="card mb-2" style="padding:1.5rem;">
+        <h3>Search Index</h3>
+        <p class="text-muted">Index contains <strong th:text="${indexCount}">0</strong> artifacts.</p>
+        <button class="btn btn-primary"
+                hx-post="/admin/reindex"
+                hx-target="#reindex-result"
+                hx-swap="innerHTML">
+            Rebuild Index
+        </button>
+        <div id="reindex-result" class="mt-1"></div>
+    </div>
+
+    <!-- Users Section -->
+    <div class="card" style="padding:1.5rem;">
+        <h3>Users</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Roles</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.username()}">admin</td>
+                    <td th:text="${#strings.listJoin(user.roles(), ', ')}">ADMIN, EDITOR</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

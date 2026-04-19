@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .permitAll())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/healthz").permitAll()
+                        .requestMatchers("/css/**", "/js/**").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/artifacts/**").hasAnyRole("EDITOR", "ADMIN")

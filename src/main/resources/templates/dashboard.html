@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <span class="subtitle">AI Agent Artifact Library</span>
+    </div>
+
+    <!-- Quick Search -->
+    <form action="/browse" method="get" class="filters" style="margin-bottom:2rem;">
+        <div class="filter-group" style="flex:1;">
+            <label for="search-input">Search artifacts</label>
+            <input type="text" id="search-input" name="q" placeholder="Search by name, description, tags..."/>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" th:text="${totalCount}">0</div>
+            <div class="stat-label">Total Artifacts</div>
+        </div>
+        <th:block th:each="entry : ${typeCounts}">
+            <div class="stat-card">
+                <div class="stat-value" th:text="${entry.value}">0</div>
+                <div class="stat-label">
+                    <a th:href="@{/browse(type=${entry.key.slug()})}" th:text="${entry.key.slug()}">type</a>
+                </div>
+            </div>
+        </th:block>
+    </div>
+
+    <!-- Recent Artifacts -->
+    <h2>Recent Artifacts</h2>
+    <div th:if="${#lists.isEmpty(recentArtifacts)}" class="card" style="text-align:center;padding:2rem;">
+        <p class="text-muted">No artifacts yet.</p>
+        <a th:href="@{/artifacts/new}" class="btn btn-primary">Create one!</a>
+    </div>
+    <div th:unless="${#lists.isEmpty(recentArtifacts)}" class="card-grid">
+        <th:block th:each="artifact : ${recentArtifacts}">
+            <div th:replace="~{fragments/artifact-card :: artifactCard(${artifact})}"></div>
+        </th:block>
+    </div>
+
+</div>
+</body>
+</html>

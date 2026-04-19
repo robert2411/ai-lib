@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<div th:fragment="results">
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(artifacts)}" class="card" style="text-align:center;padding:2rem;">
+        <p class="text-muted">No artifacts match your filters.</p>
+    </div>
+
+    <!-- Results Grid -->
+    <div th:unless="${#lists.isEmpty(artifacts)}" class="card-grid">
+        <th:block th:each="artifact : ${artifacts}">
+            <div th:replace="~{fragments/artifact-card :: artifactCard(${artifact})}"></div>
+        </th:block>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination" th:if="${totalPages > 1}">
+        <a th:if="${currentPage > 0}"
+           th:href="${baseUrl + '&page=' + (currentPage - 1)}"
+           hx-get="${baseUrl + '&page=' + (currentPage - 1)}"
+           hx-target="#results"
+           class="prev">&laquo; Prev</a>
+        <span th:if="${currentPage == 0}" class="disabled">&laquo; Prev</span>
+
+        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <span th:if="${i == currentPage}" class="active" th:text="${i + 1}">1</span>
+            <a th:unless="${i == currentPage}"
+               th:href="${baseUrl + '&page=' + i}"
+               hx-get="${baseUrl + '&page=' + i}"
+               hx-target="#results"
+               th:text="${i + 1}">1</a>
+        </th:block>
+
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="${baseUrl + '&page=' + (currentPage + 1)}"
+           hx-get="${baseUrl + '&page=' + (currentPage + 1)}"
+           hx-target="#results"
+           class="next">Next &raquo;</a>
+        <span th:if="${currentPage >= totalPages - 1}" class="disabled">Next &raquo;</span>
+    </nav>
+</div>
+</body>
+</html>

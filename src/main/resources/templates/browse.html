@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Browse</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="page-header">
+        <h1>Browse Artifacts</h1>
+        <span class="subtitle" th:text="${totalCount + ' artifacts'}">0 artifacts</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <div class="filter-group">
+            <label for="q">Search</label>
+            <input type="text" id="q" name="q" th:value="${query}" placeholder="Search..."
+                   hx-get="/browse/results"
+                   hx-target="#results"
+                   hx-include=".filters select"
+                   hx-trigger="keyup changed delay:300ms"
+                   hx-push-url="true"/>
+        </div>
+        <div class="filter-group">
+            <label for="type">Type</label>
+            <select id="type" name="type"
+                    hx-get="/browse/results"
+                    hx-target="#results"
+                    hx-include=".filters input, .filters select"
+                    hx-trigger="change"
+                    hx-push-url="true">
+                <option value="">All Types</option>
+                <option th:each="t : ${types}" th:value="${t.slug()}" th:text="${t.slug()}"
+                        th:selected="${t.slug() == selectedType}">type</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="harness">Harness</label>
+            <select id="harness" name="harness"
+                    hx-get="/browse/results"
+                    hx-target="#results"
+                    hx-include=".filters input, .filters select"
+                    hx-trigger="change"
+                    hx-push-url="true">
+                <option value="">All Harnesses</option>
+                <option th:each="h : ${harnesses}" th:value="${h.slug()}" th:text="${h.slug()}"
+                        th:selected="${h.slug() == selectedHarness}">harness</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="tag">Tag</label>
+            <select id="tag" name="tag"
+                    hx-get="/browse/results"
+                    hx-target="#results"
+                    hx-include=".filters input, .filters select"
+                    hx-trigger="change"
+                    hx-push-url="true">
+                <option value="">All Tags</option>
+                <option th:each="tg : ${tags}" th:value="${tg}" th:text="${tg}"
+                        th:selected="${tg == selectedTag}">tag</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results">
+        <div th:replace="~{fragments/browse-results :: results}"></div>
+    </div>
+
+</div>
+</body>
+</html>

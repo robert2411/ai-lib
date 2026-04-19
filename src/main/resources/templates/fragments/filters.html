@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<div th:fragment="filters(types, harnesses, tags, selectedType, selectedHarness, selectedTag)" class="filters">
+    <div class="filter-group">
+        <label for="type-filter">Type</label>
+        <select id="type-filter" name="type"
+                hx-get="/browse"
+                hx-target="#artifact-list"
+                hx-include=".filters select, .filters input"
+                hx-push-url="true">
+            <option value="">All Types</option>
+            <option th:each="t : ${types}" th:value="${t.slug()}" th:text="${t.slug()}" th:selected="${t.slug() == selectedType}">type</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label for="harness-filter">Harness</label>
+        <select id="harness-filter" name="harness"
+                hx-get="/browse"
+                hx-target="#artifact-list"
+                hx-include=".filters select, .filters input"
+                hx-push-url="true">
+            <option value="">All Harnesses</option>
+            <option th:each="h : ${harnesses}" th:value="${h.slug()}" th:text="${h.slug()}" th:selected="${h.slug() == selectedHarness}">harness</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label for="tag-filter">Tag</label>
+        <select id="tag-filter" name="tag"
+                hx-get="/browse"
+                hx-target="#artifact-list"
+                hx-include=".filters select, .filters input"
+                hx-push-url="true">
+            <option value="">All Tags</option>
+            <option th:each="tg : ${tags}" th:value="${tg}" th:text="${tg}" th:selected="${tg == selectedTag}">tag</option>
+        </select>
+    </div>
+</div>
+</body>
+</html>

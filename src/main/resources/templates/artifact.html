@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${artifact.metadata().title() != null ? artifact.metadata().title() : artifact.metadata().name()}">Artifact</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="detail-header">
+        <h1 th:text="${artifact.metadata().title() != null ? artifact.metadata().title() : artifact.metadata().name()}">Artifact Name</h1>
+        <div class="detail-meta">
+            <span class="badge badge-type" th:text="${artifact.metadata().type().slug()}">type</span>
+            <span class="badge badge-version" th:text="'v' + ${currentVersion}">v1.0.0</span>
+            <span th:each="h : ${artifact.metadata().harnesses()}" class="badge badge-harness" th:text="${h.slug()}">harness</span>
+            <span th:if="${artifact.metadata().author()}" class="text-muted text-sm" th:text="'by ' + ${artifact.metadata().author()}">by author</span>
+        </div>
+    </div>
+
+    <!-- Metadata Panel -->
+    <div class="card mb-2">
+        <p th:if="${artifact.metadata().description()}" th:text="${artifact.metadata().description()}">Description</p>
+        <div class="card-meta">
+            <span th:each="t : ${artifact.metadata().tags()}" class="tag" th:text="${t}">tag</span>
+            <span th:if="${artifact.metadata().category()}" class="text-muted text-sm" th:text="'Category: ' + ${artifact.metadata().category()}"></span>
+            <span th:if="${artifact.metadata().language()}" class="text-muted text-sm" th:text="'Language: ' + ${artifact.metadata().language()}"></span>
+        </div>
+    </div>
+
+    <!-- Version Dropdown & Actions -->
+    <div class="filters" style="justify-content:space-between;align-items:center;">
+        <div class="filter-group">
+            <label for="version-select">Version</label>
+            <select id="version-select">
+                <option th:each="v : ${versions}" th:value="${v.version()}" th:text="${v.version()}"
+                        th:selected="${v.version() == currentVersion}">1.0.0</option>
+            </select>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+            <a th:href="@{/artifacts/{slug}/{ver}/raw(slug=${artifact.metadata().name()}, ver=${currentVersion})}"
+               class="btn btn-secondary">Raw Download</a>
+            <button class="btn btn-primary" th:data-copy="${installCommand}" onclick="copyToClipboard(this.dataset.copy)">
+                Copy Install Command
+            </button>
+            <a sec:authorize="hasRole('EDITOR')"
+               th:href="@{/artifacts/{slug}/edit(slug=${artifact.metadata().name()})}"
+               class="btn btn-primary">Edit</a>
+        </div>
+    </div>
+
+    <!-- Agent Group Members Panel -->
+    <div th:if="${artifact.metadata().type().name() == 'AGENT_GROUP' and members != null}" class="card mb-2">
+        <h3>Group Members</h3>
+        <table class="admin-table">
+            <thead>
+                <tr><th>Agent</th><th>Role</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="member : ${members}">
+                    <td><a th:href="@{/artifacts/{slug}(slug=${member.slug()})}" th:text="${member.metadata().title() != null ? member.metadata().title() : member.slug()}">Agent</a></td>
+                    <td><span class="badge badge-type" th:text="${member.role()}">role</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="mt-2">
+            <button class="btn btn-primary" th:data-copy="${groupInstallCommand}" onclick="copyToClipboard(this.dataset.copy)">
+                Install Group
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div id="content-area" class="detail-content">
+        <div th:replace="~{fragments/artifact-content :: content}"></div>
+    </div>
+
+</div>
+
+<div layout:fragment="scripts">
+    <script th:inline="javascript">
+        var artifactSlug = /*[[${artifact.metadata().name()}]]*/ "";
+        document.getElementById("version-select").addEventListener("change", function() {
+            window.location = "/artifacts/" + artifactSlug + "/" + this.value;
+        });
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Optional: show brief "Copied!" feedback
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

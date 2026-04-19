@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<div th:fragment="artifactCard(artifact)" class="card">
+    <h3 class="card-title">
+        <a th:href="@{/artifacts/{slug}(slug=${artifact.name()})}" th:text="${artifact.title() != null ? artifact.title() : artifact.name()}">Artifact Name</a>
+    </h3>
+    <p class="card-description" th:text="${artifact.description()}">Description goes here.</p>
+    <div class="card-meta">
+        <span class="badge badge-type" th:text="${artifact.type().slug()}">type</span>
+        <span class="badge badge-version" th:text="'v' + ${artifact.version()}">v1.0.0</span>
+        <span th:each="h : ${artifact.harnesses()}" class="badge badge-harness" th:text="${h.slug()}">harness</span>
+        <span th:if="${artifact.type().name() == 'AGENT_GROUP' and artifact.members() != null}" class="badge badge-members" th:text="${artifact.members().size()} + ' agents'">3 agents</span>
+        <span th:each="t : ${artifact.tags()}" class="tag" th:text="${t}">tag</span>
+    </div>
+</div>
+</body>
+</html>

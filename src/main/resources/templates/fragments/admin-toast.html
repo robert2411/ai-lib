@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+<div th:fragment="toast">
+    <div th:classappend="${toastType == 'success' ? 'alert-success' : 'alert-error'}"
+         class="alert" th:text="${toastMessage}">Message</div>
+</div>
+</body>
+</html>
