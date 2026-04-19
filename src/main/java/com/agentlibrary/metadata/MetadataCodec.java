@@ -2,7 +2,9 @@ package com.agentlibrary.metadata;
 
 import com.agentlibrary.model.*;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -38,7 +40,7 @@ public class MetadataCodec {
         String yamlSection = parts[0];
         String body = parts[1];
 
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         Map<String, Object> map = yaml.load(yamlSection);
         if (map == null) {
             map = new LinkedHashMap<>();

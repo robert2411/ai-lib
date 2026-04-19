@@ -3,7 +3,9 @@ package com.agentlibrary.storage;
 import com.agentlibrary.metadata.MetadataCodec;
 import com.agentlibrary.model.ArtifactMetadata;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +35,7 @@ public class IndexFile {
             return List.of();
         }
 
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
         Object loaded = yaml.load(yamlContent);
         if (!(loaded instanceof Map<?, ?> root)) {
             return List.of();
