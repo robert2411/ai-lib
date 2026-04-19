@@ -1,0 +1,16 @@
+users:
+  - username: admin
+    password: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
+    roles:
+      - ADMIN
+      - EDITOR
+      - USER
+  - username: editor
+    password: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
+    roles:
+      - EDITOR
+      - USER
+  - username: reader
+    password: "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
+    roles:
+      - USER

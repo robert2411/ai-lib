@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: agent-library-test
+
+library:
+  data-dir: ./target/test-data
+  repo-path: ./target/test-data/library.git
+  work-path: ./target/test-data/library-work
+  users-file: src/test/resources/users.yaml
