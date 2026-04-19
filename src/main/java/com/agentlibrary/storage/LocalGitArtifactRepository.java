@@ -143,7 +143,11 @@ public class LocalGitArtifactRepository implements ArtifactRepository {
 
             // 8. Notify index to refresh
             if (refreshCallback != null) {
-                refreshCallback.run();
+                try {
+                    refreshCallback.run();
+                } catch (Exception e) {
+                    LOG.warning("Refresh callback failed after save (data committed): " + e.getMessage());
+                }
             }
 
             // Get timestamp from commit
@@ -287,7 +291,11 @@ public class LocalGitArtifactRepository implements ArtifactRepository {
 
             // Notify index to refresh
             if (refreshCallback != null) {
-                refreshCallback.run();
+                try {
+                    refreshCallback.run();
+                } catch (Exception e) {
+                    LOG.warning("Refresh callback failed after delete (data committed): " + e.getMessage());
+                }
             }
         } catch (StorageException e) {
             throw e;

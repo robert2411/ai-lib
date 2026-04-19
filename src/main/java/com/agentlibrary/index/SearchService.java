@@ -2,6 +2,7 @@ package com.agentlibrary.index;
 
 import com.agentlibrary.model.ArtifactMetadata;
 import com.agentlibrary.model.Filter;
+import jakarta.annotation.PreDestroy;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
@@ -36,6 +37,7 @@ public class SearchService {
     /**
      * Rebuilds the Lucene index from the given list of artifacts.
      * Thread-safe: builds outside the lock, then swaps references.
+     * Closes old resources (DirectoryReader + Directory) after swap.
      */
     public void rebuild(List<ArtifactMetadata> artifacts) {
         try {
@@ -90,9 +92,15 @@ public class SearchService {
             DirectoryReader reader = DirectoryReader.open(newDirectory);
             IndexSearcher newSearcher = new IndexSearcher(reader);
 
+            // Capture old resources before swap
+            IndexSearcher oldSearcher;
+            ByteBuffersDirectory oldDirectory;
+
             // Swap references under write lock
             lock.writeLock().lock();
             try {
+                oldSearcher = this.searcher;
+                oldDirectory = this.directory;
                 this.searcher = newSearcher;
                 this.directory = newDirectory;
                 this.metadataLookup = newLookup;
@@ -100,10 +108,50 @@ public class SearchService {
                 lock.writeLock().unlock();
             }
 
+            // Close old resources outside lock
+            closeOldResources(oldSearcher, oldDirectory);
+
             LOG.fine("SearchService rebuilt index with " + artifacts.size() + " documents");
         } catch (IOException e) {
             LOG.warning("Failed to rebuild search index: " + e.getMessage());
         }
+    }
+
+    /**
+     * Closes the DirectoryReader (via the searcher's IndexReader) and Directory.
+     */
+    private void closeOldResources(IndexSearcher oldSearcher, ByteBuffersDirectory oldDirectory) {
+        if (oldSearcher != null) {
+            try {
+                oldSearcher.getIndexReader().close();
+            } catch (IOException e) {
+                LOG.warning("Failed to close old IndexReader: " + e.getMessage());
+            }
+        }
+        if (oldDirectory != null) {
+            try {
+                oldDirectory.close();
+            } catch (IOException e) {
+                LOG.warning("Failed to close old Directory: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Releases Lucene resources on application shutdown.
+     */
+    @PreDestroy
+    public void close() {
+        lock.writeLock().lock();
+        try {
+            closeOldResources(this.searcher, this.directory);
+            this.searcher = null;
+            this.directory = null;
+            this.metadataLookup = Map.of();
+        } finally {
+            lock.writeLock().unlock();
+        }
+        LOG.fine("SearchService closed");
     }
 
     /**

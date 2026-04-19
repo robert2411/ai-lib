@@ -216,4 +216,80 @@ class SearchServiceTest {
         assertEquals(1, results.size());
         assertEquals("skill-git", results.get(0).name());
     }
+
+    @Test
+    void rebuild_closesOldResourcesOnSubsequentCall() {
+        // First rebuild creates initial resources
+        List<ArtifactMetadata> initial = List.of(
+                metadata("tool-a", "Tool A", "First tool",
+                        ArtifactType.SKILL, List.of(), List.of())
+        );
+        searchService.rebuild(initial);
+
+        // Verify search works
+        assertEquals(1, searchService.search("tool", null).size());
+
+        // Second rebuild should close old resources without error
+        List<ArtifactMetadata> updated = List.of(
+                metadata("tool-b", "Tool B", "Second tool",
+                        ArtifactType.SKILL, List.of(), List.of())
+        );
+        searchService.rebuild(updated);
+
+        // Old index gone, new one works
+        assertTrue(searchService.search("First", null).isEmpty());
+        assertEquals(1, searchService.search("Second", null).size());
+    }
+
+    @Test
+    void rebuild_multipleTimesDoesNotLeak() {
+        // Repeatedly rebuild to ensure old resources are released each time
+        for (int i = 0; i < 10; i++) {
+            List<ArtifactMetadata> artifacts = List.of(
+                    metadata("tool-" + i, "Tool " + i, "Iteration " + i,
+                            ArtifactType.SKILL, List.of(), List.of())
+            );
+            searchService.rebuild(artifacts);
+        }
+
+        // Only the final iteration should be searchable by unique name
+        List<ArtifactMetadata> results = searchService.search(null, null);
+        assertEquals(1, results.size());
+        assertEquals("tool-9", results.get(0).name());
+    }
+
+    @Test
+    void close_releasesResourcesAndReturnsEmpty() {
+        List<ArtifactMetadata> artifacts = List.of(
+                metadata("tool-a", "Tool A", "A tool",
+                        ArtifactType.SKILL, List.of(), List.of())
+        );
+        searchService.rebuild(artifacts);
+        assertEquals(1, searchService.search("tool", null).size());
+
+        // Close should release resources
+        searchService.close();
+
+        // After close, search returns empty
+        assertTrue(searchService.search("tool", null).isEmpty());
+    }
+
+    @Test
+    void close_whenNeverRebuilt_doesNotThrow() {
+        // Closing a never-built service should not throw
+        assertDoesNotThrow(() -> searchService.close());
+    }
+
+    @Test
+    void close_calledTwice_doesNotThrow() {
+        List<ArtifactMetadata> artifacts = List.of(
+                metadata("tool-a", "Tool A", "A tool",
+                        ArtifactType.SKILL, List.of(), List.of())
+        );
+        searchService.rebuild(artifacts);
+        searchService.close();
+
+        // Second close should be safe (idempotent)
+        assertDoesNotThrow(() -> searchService.close());
+    }
 }
