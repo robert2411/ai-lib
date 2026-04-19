@@ -1,9 +1,10 @@
 ---
 id: TASK-0003
 title: Milestone 3 — Git Storage Layer
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-19 20:03'
+updated_date: '2026-04-19 21:44'
 labels:
   - milestone
 dependencies: []
