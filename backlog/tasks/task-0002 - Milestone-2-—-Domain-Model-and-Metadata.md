@@ -1,9 +1,10 @@
 ---
 id: TASK-0002
 title: Milestone 2 — Domain Model and Metadata
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-19 20:03'
+updated_date: '2026-04-19 21:04'
 labels:
   - milestone
 dependencies: []
