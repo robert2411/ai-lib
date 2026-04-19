@@ -1,7 +1,6 @@
 # Backlog CLI Skill — Usage Guide
 
-Companion reference for the [`backlog-cli` skill](../SKILL.md). Covers installation, common patterns, troubleshooting,
-and contributing guidelines.
+Companion reference for the [`backlog-cli` skill](../SKILL.md). Covers installation, common patterns, troubleshooting, and contributing guidelines.
 
 ---
 
@@ -30,7 +29,6 @@ backlog init
 ```
 
 This creates:
-
 ```
 backlog/
 ├── config.yml        # Project settings, global DoD defaults
@@ -52,8 +50,7 @@ Place the skill directory in `.github/skills/` inside any repository:
             └── USAGE.md      ← this file
 ```
 
-GitHub Copilot auto-discovers skills by scanning `.github/skills/*/SKILL.md`. No additional configuration needed. The
-skill activates when your prompt mentions task management, backlog, kanban, AC, DoD, MCP, or related keywords.
+GitHub Copilot auto-discovers skills by scanning `.github/skills/*/SKILL.md`. No additional configuration needed. The skill activates when your prompt mentions task management, backlog, kanban, AC, DoD, MCP, or related keywords.
 
 ### 4. Configure Global Definition of Done
 
@@ -120,11 +117,11 @@ backlog task edit <id> --check-dod 1 --check-dod 2
 
 The CLI stores input literally — `"...\n..."` in normal quotes is **not** a newline.
 
-| Shell      | Pattern    | Example                                |
-|------------|------------|----------------------------------------|
-| Bash/Zsh   | `$'...'`   | `--notes $'Line 1\nLine 2'`            |
-| POSIX      | `printf`   | `--notes "$(printf 'Line 1\nLine 2')"` |
-| PowerShell | backtick-n | `--notes "Line 1\`nLine 2"`            |
+| Shell | Pattern | Example |
+|-------|---------|---------|
+| Bash/Zsh | `$'...'` | `--notes $'Line 1\nLine 2'` |
+| POSIX | `printf` | `--notes "$(printf 'Line 1\nLine 2')"` |
+| PowerShell | backtick-n | `--notes "Line 1\`nLine 2"` |
 
 ```bash
 # Bash/Zsh (recommended)
@@ -188,17 +185,17 @@ backlog task edit <id> -s Done
 
 ## Troubleshooting
 
-| Issue                          | Cause                    | Solution                                                      |
-|--------------------------------|--------------------------|---------------------------------------------------------------|
-| `backlog: command not found`   | CLI not installed        | `npm install -g backlog.md`                                   |
-| `No config found`              | Not in project root      | Run `backlog init` or `cd` to project root                    |
-| Task not found by ID           | Wrong ID or archived     | `backlog task list --plain` to list active tasks              |
-| AC index out of range          | Stale index reference    | `backlog task <id> --plain` to see current AC indices         |
-| `\n` appearing as literal text | Wrong quote style        | Use `$'...'` in bash/zsh or `printf`                          |
-| Skill not auto-activating      | Keywords not matching    | Mention "backlog", "task", "AC", or "DoD" explicitly          |
-| Metadata out of sync           | Direct file edit         | Re-edit via CLI: `backlog task edit <id> -s <current-status>` |
-| Board shows empty columns      | All tasks in same status | Check `backlog task list --plain` for actual statuses         |
-| Search returns no results      | Term too specific        | Use shorter keywords; backlog uses fuzzy matching             |
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| `backlog: command not found` | CLI not installed | `npm install -g backlog.md` |
+| `No config found` | Not in project root | Run `backlog init` or `cd` to project root |
+| Task not found by ID | Wrong ID or archived | `backlog task list --plain` to list active tasks |
+| AC index out of range | Stale index reference | `backlog task <id> --plain` to see current AC indices |
+| `\n` appearing as literal text | Wrong quote style | Use `$'...'` in bash/zsh or `printf` |
+| Skill not auto-activating | Keywords not matching | Mention "backlog", "task", "AC", or "DoD" explicitly |
+| Metadata out of sync | Direct file edit | Re-edit via CLI: `backlog task edit <id> -s <current-status>` |
+| Board shows empty columns | All tasks in same status | Check `backlog task list --plain` for actual statuses |
+| Search returns no results | Term too specific | Use shorter keywords; backlog uses fuzzy matching |
 
 ---
 

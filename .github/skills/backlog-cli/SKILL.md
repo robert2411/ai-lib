@@ -5,8 +5,7 @@ description: 'Comprehensive project management via the Backlog.md CLI tool. Use 
 
 # Backlog CLI Skill
 
-Full-featured project management through the `backlog` CLI. Handles entire task lifecycle, AC/DoD management, search,
-board visualization, and MCP integration.
+Full-featured project management through the `backlog` CLI. Handles entire task lifecycle, AC/DoD management, search, board visualization, and MCP integration.
 
 ## When to Use This Skill
 
@@ -27,16 +26,18 @@ board visualization, and MCP integration.
 
 ## Core Concepts
 
-| Concept                      | Description                                            |
-|------------------------------|--------------------------------------------------------|
-| **Task**                     | Unit of work in `backlog/tasks/task-<id> - <title>.md` |
-| **Acceptance Criteria (AC)** | Numbered checkboxes defining "what done looks like"    |
-| **Definition of Done (DoD)** | Per-task or global checklist for quality bar           |
-| **Status**                   | `To Do` → `In Progress` → `Done`                       |
-| **Labels**                   | Free-form tags for filtering                           |
-| **Milestone**                | Grouping of related tasks                              |
+| Concept | Description |
+|---------|-------------|
+| **Task** | Unit of work in `backlog/tasks/task-<id> - <title>.md` |
+| **Acceptance Criteria (AC)** | Numbered checkboxes defining "what done looks like" |
+| **Definition of Done (DoD)** | Per-task or global checklist for quality bar |
+| **Status** | `To Do` → `In Progress` → `Done` |
+| **Labels** | Free-form tags for filtering |
+| **Milestone** | Grouping of related tasks |
 
 **Golden rule:** Never edit task `.md` files directly. All writes go through the CLI.
+
+> **Exception — milestone assignment:** There is no `--milestone` CLI flag for `task create` or `task edit`. To assign a task to a milestone, edit the task's frontmatter directly and add `milestone: <name>`. This is the one supported method.
 
 ---
 
@@ -92,18 +93,17 @@ backlog task edit <id> -s Done
 
 ## Acceptance Criteria Management
 
-| Operation        | Command                                                                       |
-|------------------|-------------------------------------------------------------------------------|
-| Add AC           | `backlog task edit <id> --ac "Criterion text"`                                |
-| Add multiple ACs | `backlog task edit <id> --ac "First" --ac "Second"`                           |
-| Check AC #1      | `backlog task edit <id> --check-ac 1`                                         |
-| Check multiple   | `backlog task edit <id> --check-ac 1 --check-ac 2`                            |
-| Uncheck AC #2    | `backlog task edit <id> --uncheck-ac 2`                                       |
-| Remove AC #3     | `backlog task edit <id> --remove-ac 3`                                        |
-| Mixed ops        | `backlog task edit <id> --check-ac 1 --uncheck-ac 2 --remove-ac 3 --ac "New"` |
+| Operation | Command |
+|-----------|---------|
+| Add AC | `backlog task edit <id> --ac "Criterion text"` |
+| Add multiple ACs | `backlog task edit <id> --ac "First" --ac "Second"` |
+| Check AC #1 | `backlog task edit <id> --check-ac 1` |
+| Check multiple | `backlog task edit <id> --check-ac 1 --check-ac 2` |
+| Uncheck AC #2 | `backlog task edit <id> --uncheck-ac 2` |
+| Remove AC #3 | `backlog task edit <id> --remove-ac 3` |
+| Mixed ops | `backlog task edit <id> --check-ac 1 --uncheck-ac 2 --remove-ac 3 --ac "New"` |
 
 **Rules:**
-
 - Criteria are outcome-oriented and testable, not implementation steps
 - Good: "User can log in with valid credentials"
 - Bad: "Add handleLogin() function to auth.ts"
@@ -112,12 +112,12 @@ backlog task edit <id> -s Done
 
 ## Definition of Done (DoD) Management
 
-| Operation               | Command                                         |
-|-------------------------|-------------------------------------------------|
-| Add DoD item            | `backlog task edit <id> --dod "Item text"`      |
-| Check DoD #1            | `backlog task edit <id> --check-dod 1`          |
-| Uncheck DoD #2          | `backlog task edit <id> --uncheck-dod 2`        |
-| Remove DoD #3           | `backlog task edit <id> --remove-dod 3`         |
+| Operation | Command |
+|-----------|---------|
+| Add DoD item | `backlog task edit <id> --dod "Item text"` |
+| Check DoD #1 | `backlog task edit <id> --check-dod 1` |
+| Uncheck DoD #2 | `backlog task edit <id> --uncheck-dod 2` |
+| Remove DoD #3 | `backlog task edit <id> --remove-dod 3` |
 | Create without defaults | `backlog task create "Title" --no-dod-defaults` |
 
 Global DoD defaults live in `backlog/config.yml` under `definition_of_done`.
@@ -182,8 +182,20 @@ backlog milestone list --plain
 backlog milestone archive "Milestone Name"
 ```
 
-Assign a task to a milestone by adding `milestone: <name>` to the task frontmatter — or set it when the milestone file
-is created in `backlog/milestones/`.
+> **Note:** The `backlog milestone` CLI only supports `list` and `archive` commands. There is no `create` subcommand and no `--milestone` flag on `task create` or `task edit`.
+
+**Assigning a task to a milestone** must be done by editing the task's frontmatter directly:
+
+```yaml
+---
+id: task-42
+title: My Task
+status: To Do
+milestone: Sprint 1
+---
+```
+
+Add or update the `milestone: <name>` field to match the milestone name exactly.
 
 ### Decisions
 
@@ -278,35 +290,36 @@ backlog task edit <id> --plan $'1. Review existing code\n2. Design approach\n3. 
 
 ## Task Content Reference
 
-| Field           | CLI Flag                 | Notes                             |
-|-----------------|--------------------------|-----------------------------------|
-| Title           | `-t "New Title"`         | Short, action-oriented            |
-| Description     | `-d "text"`              | The "why"                         |
-| Status          | `-s "In Progress"`       | To Do / In Progress / Done        |
-| Assignee        | `-a @name`               | One assignee                      |
-| Labels          | `-l label1,label2`       | Comma-separated                   |
-| Priority        | `--priority high`        | low / medium / high               |
-| Plan            | `--plan "text"`          | The "how" — added after starting  |
-| Notes (replace) | `--notes "text"`         | Progress log                      |
-| Notes (append)  | `--append-notes "text"`  | Preferred — preserves history     |
-| Final Summary   | `--final-summary "text"` | PR description — added at wrap-up |
-| Dependencies    | `--dep task-1`           | Task relationships                |
-| References      | `--ref src/file.ts`      | Code or URL references            |
+| Field | CLI Flag | Notes |
+|-------|----------|-------|
+| Title | `-t "New Title"` | Short, action-oriented |
+| Description | `-d "text"` | The "why" |
+| Status | `-s "In Progress"` | To Do / In Progress / Done |
+| Assignee | `-a @name` | One assignee |
+| Labels | `-l label1,label2` | Comma-separated |
+| Priority | `--priority high` | low / medium / high |
+| Plan | `--plan "text"` | The "how" — added after starting |
+| Notes (replace) | `--notes "text"` | Progress log |
+| Notes (append) | `--append-notes "text"` | Preferred — preserves history |
+| Final Summary | `--final-summary "text"` | PR description — added at wrap-up |
+| Dependencies | `--dep task-1` | Task relationships |
+| References | `--ref src/file.ts` | Code or URL references |
+| Milestone | *(frontmatter only)* | Set `milestone: <name>` in task frontmatter — no CLI flag exists |
 
 ---
 
 ## Troubleshooting
 
-| Issue                     | Solution                                                                    |
-|---------------------------|-----------------------------------------------------------------------------|
-| Skill not triggering      | Add more keywords from description to your prompt                           |
-| Task not found            | Run `backlog task list --plain` to check ID                                 |
-| AC won't check            | View task first: `backlog task <id> --plain` to confirm AC indices          |
-| Metadata out of sync      | Re-edit via CLI: `backlog task edit <id> -s <current-status>`               |
-| Newlines not preserved    | Use `$'...'` quoting (bash/zsh) or `printf`                                 |
+| Issue | Solution |
+|-------|----------|
+| Skill not triggering | Add more keywords from description to your prompt |
+| Task not found | Run `backlog task list --plain` to check ID |
+| AC won't check | View task first: `backlog task <id> --plain` to confirm AC indices |
+| Metadata out of sync | Re-edit via CLI: `backlog task edit <id> -s <current-status>` |
+| Newlines not preserved | Use `$'...'` quoting (bash/zsh) or `printf` |
 | MCP server not responding | Ensure `cwd` in MCP config points to project root with `backlog/config.yml` |
-| `backlog` not found       | Run `npm install -g backlog.md` or `bun install -g backlog.md`              |
-| Init error                | Run `backlog init` in project root                                          |
+| `backlog` not found | Run `npm install -g backlog.md` or `bun install -g backlog.md` |
+| Init error | Run `backlog init` in project root |
 
 ---
 
@@ -320,6 +333,9 @@ backlog task edit <id> --plan $'1. Review existing code\n2. Design approach\n3. 
 - [AI Agent Integration Guide](../../../backlog/docs/doc-13%20-%20Backlog-CLI-AI-Agent-Integration-Guide.md)
 - [Advanced Features Guide](../../../backlog/docs/doc-14%20-%20Backlog-CLI-Advanced-Features-Guide.md)
 - [USAGE.md](./references/USAGE.md)
+
+
+
 
 
 

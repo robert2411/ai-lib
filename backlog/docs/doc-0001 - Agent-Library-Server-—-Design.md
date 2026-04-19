@@ -8,7 +8,7 @@ created_date: '2026-04-19 19:32'
 
 **Date:** 2026-04-19
 **Status:** Approved, ready for planning
-**Source of truth:** `docs/superpowers/specs/2026-04-19-agent-library-design.md` (committed to git)
+**Source of truth:** `docs/specs/2026-04-19-agent-library-design.md` (committed to git)
 
 ## Purpose
 
