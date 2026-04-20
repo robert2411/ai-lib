@@ -1,9 +1,10 @@
 ---
 id: TASK-0011
 title: Milestone 11 — E2E and CLI Tests
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-19 20:04'
+updated_date: '2026-04-20 01:16'
 labels:
   - milestone
 dependencies: []
