@@ -89,7 +89,8 @@ public class InstallManifestResolver {
                             member.slug(),
                             member.metadata().type(),
                             sourcePath,
-                            targetPath
+                            targetPath,
+                            member.role()
                     ));
                 }
             } else {

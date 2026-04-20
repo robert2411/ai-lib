@@ -69,6 +69,7 @@ class InstallManifestResolverTest {
         assertEquals(ArtifactType.SKILL, entry.type());
         assertEquals("skill.md", entry.sourcePath());
         assertEquals("~/.claude/skills/git-helper/", entry.targetPath());
+        assertNull(entry.role());
     }
 
     @Test
@@ -174,6 +175,33 @@ class InstallManifestResolverTest {
         assertTrue(tree.get("entries").isArray());
         assertEquals(1, tree.get("entries").size());
         assertEquals("git-helper", tree.get("entries").get(0).get("slug").asText());
+        // Role should be null for non-group entries
+        assertTrue(tree.get("entries").get(0).get("role").isNull());
+    }
+
+    @Test
+    void manifest_groupEntries_serialiseRoleToJson() throws Exception {
+        ArtifactMetadata groupMeta = new ArtifactMetadata(
+                "my-team", "My Team", ArtifactType.AGENT_GROUP, "1.0.0",
+                "A team", List.of(Harness.CLAUDE), List.of(),
+                null, null, null, null,
+                Instant.now(), null, null,
+                List.of(new AgentGroupMember("mgr-agent", "manager")), null
+        );
+        when(artifactService.get("my-team", "latest")).thenReturn(artifact(groupMeta));
+
+        ArtifactMetadata mgrMeta = metadata("mgr-agent", ArtifactType.AGENT_CLAUDE);
+        when(artifactService.resolveGroup("my-team")).thenReturn(List.of(
+                new ResolvedGroupMember("mgr-agent", "manager", mgrMeta)
+        ));
+
+        InstallManifest manifest = resolver.resolve(List.of("my-team"), Harness.CLAUDE);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(manifest);
+
+        var tree = mapper.readTree(json);
+        assertEquals("manager", tree.get("entries").get(0).get("role").asText());
     }
 
     // === AC#4: Agent-group slug expands to one entry per member ===
@@ -211,6 +239,10 @@ class InstallManifestResolverTest {
         assertEquals("mgr-agent", manifest.entries().get(0).slug());
         assertEquals("ana-agent", manifest.entries().get(1).slug());
         assertEquals("impl-agent", manifest.entries().get(2).slug());
+        // Verify role field is populated for group members
+        assertEquals("manager", manifest.entries().get(0).role());
+        assertEquals("analyse", manifest.entries().get(1).role());
+        assertEquals("implementation", manifest.entries().get(2).role());
     }
 
     // === AC#5: Expanded group entries ordered: manager, analyse, implementation, custom ===
