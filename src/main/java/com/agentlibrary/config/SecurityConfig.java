@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/healthz").permitAll()
+                        .requestMatchers("/healthz", "/actuator/health").permitAll()
                         .requestMatchers("/css/**", "/js/**").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/**").hasRole("ADMIN")

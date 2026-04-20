@@ -10,3 +10,12 @@ library:
   repo-path: ./data/library.git
   work-path: ./data/library-work
   users-file: ./data/users.yaml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

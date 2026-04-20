@@ -51,6 +51,12 @@ class SecurityConfigTest {
     }
 
     @Test
+    void actuatorHealthEndpoint_isPublic() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void validCredentials_authenticateSuccessfully() throws Exception {
         // admin user from data/users.yaml
         mockMvc.perform(get("/api/v1/artifacts")
