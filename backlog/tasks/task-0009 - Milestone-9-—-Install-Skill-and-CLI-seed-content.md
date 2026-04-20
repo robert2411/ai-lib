@@ -1,9 +1,10 @@
 ---
 id: TASK-0009
 title: Milestone 9 — Install Skill and CLI (seed content)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-04-19 20:04'
+updated_date: '2026-04-20 00:34'
 labels:
   - milestone
 dependencies: []
