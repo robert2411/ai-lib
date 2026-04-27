@@ -35,9 +35,7 @@ Full-featured project management through the `backlog` CLI. Handles entire task 
 | **Labels** | Free-form tags for filtering |
 | **Milestone** | Grouping of related tasks |
 
-**Golden rule:** Never edit task `.md` files directly. All writes go through the CLI.
-
-> **Exception — milestone assignment:** There is no `--milestone` CLI flag for `task create` or `task edit`. To assign a task to a milestone, edit the task's frontmatter directly and add `milestone: <name>`. This is the one supported method.
+**Golden rule:** Never edit task or milestone `.md` files directly. All writes go through the CLI or the approved [`milestone-helper.sh`](.github/skills/backlog-cli/scripts/milestone-helper.sh) script.
 
 ---
 
@@ -184,18 +182,31 @@ backlog milestone archive "Milestone Name"
 
 > **Note:** The `backlog milestone` CLI only supports `list` and `archive` commands. There is no `create` subcommand and no `--milestone` flag on `task create` or `task edit`.
 
-**Assigning a task to a milestone** must be done by editing the task's frontmatter directly:
+Use the `milestone-helper.sh` script to create milestones and assign tasks to them:
 
-```yaml
----
-id: task-42
-title: My Task
-status: To Do
-milestone: Sprint 1
----
+#### Using the milestone-helper.sh script
+
+The `milestone-helper.sh` script (located in `.github/skills/backlog-cli/scripts/`) automates both milestone creation (by updating `backlog/config.yml`) and task-to-milestone assignment (by patching task frontmatter).
+
+```bash
+# Create a new milestone
+bash .github/skills/backlog-cli/scripts/milestone-helper.sh create-milestone "Sprint 1" "First sprint"
+
+# Assign a task to a milestone
+bash .github/skills/backlog-cli/scripts/milestone-helper.sh assign-task 42 "Sprint 1"
 ```
 
-Add or update the `milestone: <name>` field to match the milestone name exactly.
+- `create-milestone <name> <description>` — adds the milestone to `backlog/config.yml`
+- `assign-task <task-id> <milestone-name>` — sets `milestone:` in the task's frontmatter
+
+### Scripts
+
+Helper scripts bundled with this skill live in `.github/skills/backlog-cli/scripts/`.
+
+| Script | Description |
+|--------|-------------|
+| `milestone-helper.sh` | Creates milestones and assigns tasks to milestones via two subcommands: `create-milestone` and `assign-task` |
+| `squash-task-commits.sh` | Squashes consecutive same-task commits into one. Accepts optional `--dry-run` flag. Called by the git-commit-manager agent after each commit. Exits 0 when nothing to squash (idempotent). Exits 1 on dirty working tree. |
 
 ### Decisions
 
@@ -304,7 +315,7 @@ backlog task edit <id> --plan $'1. Review existing code\n2. Design approach\n3. 
 | Final Summary | `--final-summary "text"` | PR description — added at wrap-up |
 | Dependencies | `--dep task-1` | Task relationships |
 | References | `--ref src/file.ts` | Code or URL references |
-| Milestone | *(frontmatter only)* | Set `milestone: <name>` in task frontmatter — no CLI flag exists |
+| Milestone | *(milestone-helper.sh)* | Use `bash .github/skills/backlog-cli/scripts/milestone-helper.sh assign-task <id> "<name>"` — no CLI flag exists |
 
 ---
 
@@ -333,7 +344,8 @@ backlog task edit <id> --plan $'1. Review existing code\n2. Design approach\n3. 
 - [AI Agent Integration Guide](../../../backlog/docs/doc-13%20-%20Backlog-CLI-AI-Agent-Integration-Guide.md)
 - [Advanced Features Guide](../../../backlog/docs/doc-14%20-%20Backlog-CLI-Advanced-Features-Guide.md)
 - [USAGE.md](./references/USAGE.md)
-
+- [milestone-helper.sh](./scripts/milestone-helper.sh) — shell script for milestone creation and task-to-milestone assignment
+- [squash-task-commits.sh](./scripts/squash-task-commits.sh) — shell script for squashing consecutive same-task commits (used by git-commit-manager agent)
 
 
 
